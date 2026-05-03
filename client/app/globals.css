@@ -1,0 +1,119 @@
+@import "tailwindcss";
+
+:root {
+  /* Base */
+  --bg:        #f8f7ff;
+  --bg-2:      #f0eeff;
+  --bg-3:      #e8e5ff;
+  --surface:   #ffffff;
+
+  /* Text */
+  --ink:       #1a1535;
+  --ink-2:     #3d3660;
+  --ink-3:     #7b72a8;
+  --ink-4:     #b0aac8;
+
+  /* Primary — indigo */
+  --indigo:    #4f35d2;
+  --indigo-2:  #6b52e8;
+  --indigo-3:  #8b74f0;
+  --indigo-bg: rgba(79,53,210,0.08);
+  --indigo-border: rgba(79,53,210,0.2);
+
+  /* Accent — coral */
+  --coral:     #f05a4f;
+  --coral-bg:  rgba(240,90,79,0.08);
+
+  /* Accent — amber */
+  --amber:     #f59e0b;
+  --amber-bg:  rgba(245,158,11,0.1);
+
+  /* Accent — teal */
+  --teal:      #0d9488;
+  --teal-bg:   rgba(13,148,136,0.08);
+
+  /* Borders */
+  --border:    #e2dff5;
+  --border-2:  #ccc8e8;
+
+  /* Error */
+  --red:       #dc2626;
+  --red-bg:    rgba(220,38,38,0.06);
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  font-size: 15px;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb { background: var(--indigo-3); border-radius: 2px; }
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.fade-up { animation: fadeUp 0.4s ease both; }
+.spin    { animation: spin 0.7s linear infinite; }
+
+.stagger > * { opacity: 0; animation: fadeUp 0.4s ease both; }
+.stagger > *:nth-child(1) { animation-delay: 0.05s; }
+.stagger > *:nth-child(2) { animation-delay: 0.10s; }
+.stagger > *:nth-child(3) { animation-delay: 0.15s; }
+.stagger > *:nth-child(4) { animation-delay: 0.20s; }
+.stagger > *:nth-child(5) { animation-delay: 0.25s; }
+.stagger > *:nth-child(6) { animation-delay: 0.30s; }
+
+
+/* ── Scroll reveal ───────────────────────────── */
+@keyframes revealUp {
+  from { opacity: 0; transform: translateY(28px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes revealLeft {
+  from { opacity: 0; transform: translateX(-24px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+@keyframes revealRight {
+  from { opacity: 0; transform: translateX(24px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+@keyframes revealScale {
+  from { opacity: 0; transform: scale(0.94); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+/* Before reveal — hidden */
+.reveal        { opacity: 0; }
+.reveal-left   { opacity: 0; }
+.reveal-right  { opacity: 0; }
+.reveal-scale  { opacity: 0; }
+
+/* After reveal — animate in */
+.reveal.visible       { animation: revealUp    0.55s cubic-bezier(0.22,1,0.36,1) both; }
+.reveal-left.visible  { animation: revealLeft  0.55s cubic-bezier(0.22,1,0.36,1) both; }
+.reveal-right.visible { animation: revealRight 0.55s cubic-bezier(0.22,1,0.36,1) both; }
+.reveal-scale.visible { animation: revealScale 0.5s  cubic-bezier(0.22,1,0.36,1) both; }
+
+/* Stagger delays for grid children */
+.reveal-grid > *              { opacity: 0; }
+.reveal-grid.visible > *      { animation: revealUp 0.5s cubic-bezier(0.22,1,0.36,1) both; }
+.reveal-grid.visible > *:nth-child(1)  { animation-delay: 0.04s; }
+.reveal-grid.visible > *:nth-child(2)  { animation-delay: 0.10s; }
+.reveal-grid.visible > *:nth-child(3)  { animation-delay: 0.16s; }
+.reveal-grid.visible > *:nth-child(4)  { animation-delay: 0.22s; }
+.reveal-grid.visible > *:nth-child(5)  { animation-delay: 0.28s; }
+.reveal-grid.visible > *:nth-child(6)  { animation-delay: 0.34s; }
+.reveal-grid.visible > *:nth-child(7)  { animation-delay: 0.40s; }
+.reveal-grid.visible > *:nth-child(8)  { animation-delay: 0.46s; }
+.reveal-grid.visible > *:nth-child(9)  { animation-delay: 0.52s; }
