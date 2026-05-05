@@ -4,25 +4,26 @@ import User from "../models/User";
 
 const router = Router();
 
-// POST /api/seed — creates Admin account once, then this route should be removed
+// POST /api/seed — creates or resets Admin account
 router.post("/", async (_req: Request, res: Response): Promise<void> => {
   try {
+    const hashed = await bcrypt.hash("123456789", 10);
     const existing = await User.findOne({ username: "Admin" });
+
     if (existing) {
-      if (!existing.isAdmin) {
-        existing.isAdmin = true;
-        await existing.save();
-      }
-      res.json({ msg: "Admin account already exists", username: "Admin" });
+      // Reset password and ensure isAdmin is true
+      existing.password = hashed;
+      existing.isAdmin  = true;
+      await existing.save();
+      res.json({ msg: "Admin password reset", username: "Admin", password: "123456789" });
       return;
     }
 
-    const hashed = await bcrypt.hash("123456789", 10);
     await User.create({
       username: "Admin",
-      email: "admin@blogify.app",
+      email:    "admin@blogify.app",
       password: hashed,
-      isAdmin: true,
+      isAdmin:  true,
     });
 
     res.status(201).json({ msg: "Admin created", username: "Admin", password: "123456789" });
