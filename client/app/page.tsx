@@ -5,19 +5,9 @@ import BlogCard from "@/components/BlogCard";
 import { API } from "@/services/api";
 import { useRouter } from "next/navigation";
 import { useScrollReveal } from "@/hooks/useScrollReveal";
-import DefaultCover from "@/components/DefaultCover";
-
-const SAMPLE_BLOGS = [
-  { _id: "s1", title: "How to Build a Habit That Actually Sticks", author: "sarah_m", image: "" },
-  { _id: "s2", title: "The Quiet Power of Doing Less", author: "james_o", image: "" },
-  { _id: "s3", title: "What Traveling Alone Taught Me About People", author: "priya_n", image: "" },
-  { _id: "s4", title: "Why Deep Work Is the Skill of the Century", author: "alex_k", image: "" },
-  { _id: "s5", title: "The Art of Saying No Without Guilt", author: "mia_r", image: "" },
-  { _id: "s6", title: "Morning Routines Are Overrated", author: "dan_w", image: "" },
-];
 
 export default function HomePage() {
-  const [blogs, setBlogs] = useState<any[]>([]);
+  const [blogs, setBlogs]     = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [loggedIn, setLoggedIn] = useState(false);
   const router = useRouter();
@@ -27,14 +17,12 @@ export default function HomePage() {
   useScrollReveal();
 
   useEffect(() => {
+    setLoading(true);
     API.get("/blogs")
       .then((r) => setBlogs(r.data || []))
       .catch(() => setBlogs([]))
       .finally(() => setLoading(false));
   }, []);
-
-  const displayBlogs = !loading && blogs.length === 0 ? SAMPLE_BLOGS : blogs;
-  const isSample = !loading && blogs.length === 0;
 
   return (
     <div style={{ background: "var(--bg)", minHeight: "100vh" }}>
@@ -47,7 +35,6 @@ export default function HomePage() {
         position: "relative",
         overflow: "hidden",
       }}>
-        {/* Decorative circles */}
         <div style={{ position: "absolute", top: -60, right: -60, width: 220, height: 220, borderRadius: "50%", background: "rgba(255,255,255,0.06)" }} />
         <div style={{ position: "absolute", bottom: -40, left: -40, width: 160, height: 160, borderRadius: "50%", background: "rgba(255,255,255,0.05)" }} />
 
@@ -115,18 +102,10 @@ export default function HomePage() {
         background: "var(--surface)", borderBottom: "1px solid var(--border)",
         padding: "14px 24px",
       }}>
-        <div style={{ maxWidth: 1100, margin: "0 auto", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+        <div style={{ maxWidth: 1100, margin: "0 auto" }}>
           <h2 style={{ fontSize: 14, fontWeight: 700, color: "var(--ink-2)" }}>
-            {isSample ? "✦ Featured Stories" : `Latest Stories · ${blogs.length}`}
+            {loading ? "Loading…" : blogs.length === 0 ? "No stories yet" : `Latest Stories · ${blogs.length}`}
           </h2>
-          {isSample && (
-            <span style={{
-              fontSize: 11, color: "var(--coral)", background: "var(--coral-bg)",
-              border: "1px solid rgba(240,90,79,0.2)", borderRadius: 20, padding: "2px 10px", fontWeight: 600,
-            }}>
-              Sample
-            </span>
-          )}
         </div>
       </div>
 
@@ -140,92 +119,48 @@ export default function HomePage() {
             }} />
             <span style={{ fontSize: 13 }}>Loading stories…</span>
           </div>
+        ) : blogs.length === 0 ? (
+          <div style={{ textAlign: "center", padding: "80px 0", color: "var(--ink-4)" }}>
+            <p style={{ fontSize: 40, marginBottom: 16 }}>✍️</p>
+            <p style={{ fontSize: 16, fontWeight: 700, color: "var(--ink-2)", marginBottom: 8 }}>No stories yet</p>
+            <p style={{ fontSize: 13, marginBottom: 24 }}>Be the first to write something.</p>
+            {loggedIn ? (
+              <button
+                onClick={() => router.push("/create")}
+                style={{
+                  background: "linear-gradient(135deg, var(--indigo), var(--indigo-2))",
+                  color: "#fff", padding: "10px 24px", borderRadius: 10,
+                  fontSize: 13, fontWeight: 700,
+                  boxShadow: "0 4px 14px rgba(79,53,210,0.3)",
+                }}
+                className="hover:opacity-90 transition-opacity"
+              >
+                + Write a story
+              </button>
+            ) : (
+              <button
+                onClick={() => router.push("/register")}
+                style={{
+                  background: "linear-gradient(135deg, var(--indigo), var(--indigo-2))",
+                  color: "#fff", padding: "10px 24px", borderRadius: 10,
+                  fontSize: 13, fontWeight: 700,
+                  boxShadow: "0 4px 14px rgba(79,53,210,0.3)",
+                }}
+                className="hover:opacity-90 transition-opacity"
+              >
+                Create account to write
+              </button>
+            )}
+          </div>
         ) : (
           <div className="stagger" style={{
             display: "grid",
             gridTemplateColumns: "repeat(auto-fill, minmax(260px, 1fr))",
             gap: 24,
           }}>
-            {displayBlogs.map((b) =>
-              isSample ? (
-                <article
-                  key={b._id}
-                  onClick={() => router.push("/login")}
-                  className="group cursor-pointer"
-                  style={{
-                    background: "var(--surface)", borderRadius: 14,
-                    overflow: "hidden", border: "1px solid var(--border)",
-                    boxShadow: "0 2px 12px rgba(79,53,210,0.06)",
-                    transition: "transform 0.2s, box-shadow 0.2s",
-                  }}
-                  onMouseEnter={(e) => {
-                    (e.currentTarget as HTMLElement).style.transform = "translateY(-4px)";
-                    (e.currentTarget as HTMLElement).style.boxShadow = "0 8px 28px rgba(79,53,210,0.14)";
-                  }}
-                  onMouseLeave={(e) => {
-                    (e.currentTarget as HTMLElement).style.transform = "translateY(0)";
-                    (e.currentTarget as HTMLElement).style.boxShadow = "0 2px 12px rgba(79,53,210,0.06)";
-                  }}
-                >
-                  {/* Default cover with initials */}
-                  <div style={{ aspectRatio: "16/9", position: "relative", overflow: "hidden" }}>
-                    <DefaultCover title={b.title} accentIndex={parseInt(b._id.slice(-1), 16) % 6} height="100%" />
-                    <div style={{
-                      position: "absolute", top: 0, left: 0, right: 0, height: 4,
-                      background: ["linear-gradient(135deg,#4f35d2,#8b74f0)", "linear-gradient(135deg,#f05a4f,#f59e0b)", "linear-gradient(135deg,#0d9488,#4f35d2)", "linear-gradient(135deg,#f59e0b,#f05a4f)", "linear-gradient(135deg,#6b52e8,#0d9488)", "linear-gradient(135deg,#f05a4f,#6b52e8)"][parseInt(b._id.slice(-1), 16) % 6],
-                    }} />
-                  </div>                  <div style={{ padding: "14px 16px 16px" }}>
-                    <h2 style={{ fontSize: 14, fontWeight: 700, color: "var(--ink)", lineHeight: 1.4, marginBottom: 6 }}
-                      className="group-hover:text-[var(--indigo)] transition-colors"
-                    >
-                      {b.title}
-                    </h2>
-                    <p style={{ fontSize: 12, color: "var(--ink-3)" }}>@{b.author}</p>
-                  </div>
-                </article>
-              ) : (
-                <BlogCard key={b._id} blog={b} />
-              )
-            )}
-          </div>
-        )}
-
-        {/* CTA */}
-        {isSample && !loggedIn && (
-          <div className="reveal" style={{
-            marginTop: 40, padding: "28px 32px", borderRadius: 14,
-            background: "linear-gradient(135deg, var(--indigo-bg), var(--bg-2))",
-            border: "1px solid var(--indigo-border)", textAlign: "center",
-          }}>
-            <p style={{ fontSize: 15, fontWeight: 700, color: "var(--indigo)", marginBottom: 6 }}>
-              Sign in to read full stories
-            </p>
-            <p style={{ fontSize: 13, color: "var(--ink-3)", marginBottom: 20 }}>
-              Create a free account to read, write, and like posts.
-            </p>
-            <div style={{ display: "flex", gap: 10, justifyContent: "center" }}>
-              <button
-                onClick={() => router.push("/register")}
-                style={{
-                  background: "linear-gradient(135deg, var(--indigo), var(--indigo-2))",
-                  color: "#fff", padding: "9px 22px", borderRadius: 8, fontSize: 13, fontWeight: 700,
-                  boxShadow: "0 2px 10px rgba(79,53,210,0.3)",
-                }}
-                className="hover:opacity-90 transition-opacity"
-              >
-                Create account
-              </button>
-              <button
-                onClick={() => router.push("/login")}
-                style={{
-                  border: "1.5px solid var(--indigo-border)", color: "var(--indigo)",
-                  padding: "9px 22px", borderRadius: 8, fontSize: 13, fontWeight: 600, background: "var(--surface)",
-                }}
-                className="hover:bg-[var(--indigo-bg)] transition-colors"
-              >
-                Log in
-              </button>
-            </div>
+            {blogs.map((b) => (
+              <BlogCard key={b._id} blog={b} />
+            ))}
           </div>
         )}
       </section>

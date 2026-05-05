@@ -1,12 +1,12 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { API } from "@/services/api";
 
 type Stats = { totalUsers: number; totalBlogs: number; totalViews: number; totalLikes: number };
 type User  = { _id: string; username: string; email: string; createdAt: string };
-type Blog  = { _id: string; title: string; author: string; views: number; likes: number; createdAt: string };
+type Blog  = { _id: string; title: string; description: string; author: string; image: string; views: number; likes: number; createdAt: string };
 
 type Tab = "overview" | "users" | "blogs";
 
@@ -18,6 +18,17 @@ export default function AdminPage() {
   const [blogs, setBlogs]   = useState<Blog[]>([]);
   const [loading, setLoading] = useState(true);
   const currentUsername = typeof window !== "undefined" ? localStorage.getItem("username") : null;
+
+  // Edit blog modal
+  const [editing, setEditing]         = useState<Blog | null>(null);
+  const [editTitle, setEditTitle]     = useState("");
+  const [editDesc, setEditDesc]       = useState("");
+  const [editImage, setEditImage]     = useState<File | null>(null);
+  const [editPreview, setEditPreview] = useState<string | null>(null);
+  const [editLoading, setEditLoading] = useState(false);
+  const [editError, setEditError]     = useState("");
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const API_BASE = process.env.NEXT_PUBLIC_API_URL?.replace("/api", "") || "http://localhost:5000";
 
   useEffect(() => {
     if (!localStorage.getItem("token")) { router.replace("/login"); return; }
@@ -59,6 +70,37 @@ export default function AdminPage() {
     fetchAll();
   };
 
+  const openEdit = (blog: Blog) => {
+    setEditing(blog);
+    setEditTitle(blog.title);
+    setEditDesc(blog.description);
+    setEditPreview(blog.image ? `${API_BASE}/uploads/${blog.image}` : null);
+    setEditImage(null);
+    setEditError("");
+  };
+
+  const closeEdit = () => { setEditing(null); setEditImage(null); setEditPreview(null); setEditError(""); };
+
+  const submitEdit = async () => {
+    if (!editing) return;
+    if (!editTitle.trim() || !editDesc.trim()) { setEditError("Title and content are required"); return; }
+    setEditLoading(true);
+    setEditError("");
+    try {
+      const formData = new FormData();
+      formData.append("title", editTitle);
+      formData.append("description", editDesc);
+      if (editImage) formData.append("image", editImage);
+      await API.put(`/blogs/${editing._id}`, formData);
+      closeEdit();
+      fetchAll();
+    } catch (err: any) {
+      setEditError(err.response?.data?.msg || "Failed to update");
+    } finally {
+      setEditLoading(false);
+    }
+  };
+
   const fmt = (d: string) => new Date(d).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
 
   const tabStyle = (t: Tab): React.CSSProperties => ({
@@ -77,6 +119,7 @@ export default function AdminPage() {
   );
 
   return (
+    <>
     <div style={{ background: "var(--bg)", minHeight: "100vh", padding: "32px 24px" }}>
       <div style={{ maxWidth: 1100, margin: "0 auto" }}>
 
@@ -245,6 +288,13 @@ export default function AdminPage() {
                           View
                         </button>
                         <button
+                          onClick={() => openEdit(b)}
+                          style={{ fontSize: 12, color: "var(--teal)", fontWeight: 600, padding: "4px 10px", borderRadius: 6, border: "1px solid rgba(13,148,136,0.25)", background: "var(--teal-bg)", cursor: "pointer" }}
+                          className="hover:opacity-80 transition-opacity"
+                        >
+                          Edit
+                        </button>
+                        <button
                           onClick={() => deleteBlog(b._id)}
                           style={{ fontSize: 12, color: "var(--red)", fontWeight: 600, padding: "4px 10px", borderRadius: 6, border: "1px solid rgba(220,38,38,0.2)", background: "var(--red-bg)", cursor: "pointer" }}
                           className="hover:opacity-80 transition-opacity"
@@ -262,5 +312,67 @@ export default function AdminPage() {
         )}
       </div>
     </div>
+
+    {/* ── Edit Blog Modal ─────────────────────── */}
+    {editing && (
+      <div
+        style={{ position: "fixed", inset: 0, zIndex: 100, background: "rgba(10,8,30,0.55)", backdropFilter: "blur(4px)", display: "flex", alignItems: "center", justifyContent: "center", padding: 24 }}
+        onClick={(e) => { if (e.target === e.currentTarget) closeEdit(); }}
+      >
+        <div style={{ background: "var(--surface)", borderRadius: 16, border: "1px solid var(--border)", boxShadow: "0 24px 64px rgba(10,8,30,0.3)", width: "100%", maxWidth: 600, overflow: "hidden" }}>
+          <div style={{ height: 4, background: "linear-gradient(90deg, var(--coral), var(--amber), var(--indigo))" }} />
+          <div style={{ padding: "24px 28px 28px", display: "flex", flexDirection: "column", gap: 18 }}>
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+              <h2 style={{ fontSize: 18, fontWeight: 800, color: "var(--ink)" }}>Edit Blog <span style={{ fontSize: 13, color: "var(--ink-4)", fontWeight: 400 }}>— Admin</span></h2>
+              <button onClick={closeEdit} style={{ fontSize: 22, color: "var(--ink-4)", background: "none", border: "none", cursor: "pointer" }}>×</button>
+            </div>
+            {editError && <div style={{ background: "var(--red-bg)", border: "1px solid rgba(220,38,38,0.2)", color: "var(--red)", borderRadius: 8, padding: "10px 14px", fontSize: 13 }}>⚠ {editError}</div>}
+            <div>
+              <label style={{ fontSize: 12, fontWeight: 700, color: "var(--ink-2)", display: "block", marginBottom: 7, textTransform: "uppercase", letterSpacing: "0.06em" }}>Title</label>
+              <input type="text" value={editTitle} onChange={(e) => setEditTitle(e.target.value)}
+                style={{ width: "100%", border: "1.5px solid var(--border)", borderRadius: 8, fontSize: 14, color: "var(--ink)", background: "var(--bg)", outline: "none", padding: "11px 14px" }}
+                onFocus={(e) => (e.target.style.borderColor = "var(--indigo)")} onBlur={(e) => (e.target.style.borderColor = "var(--border)")}
+              />
+            </div>
+            <div>
+              <label style={{ fontSize: 12, fontWeight: 700, color: "var(--ink-2)", display: "block", marginBottom: 7, textTransform: "uppercase", letterSpacing: "0.06em" }}>Content</label>
+              <textarea value={editDesc} onChange={(e) => setEditDesc(e.target.value)} rows={7}
+                style={{ width: "100%", border: "1.5px solid var(--border)", borderRadius: 8, fontSize: 14, color: "var(--ink)", background: "var(--bg)", outline: "none", padding: "11px 14px", resize: "none", lineHeight: 1.75 }}
+                onFocus={(e) => (e.target.style.borderColor = "var(--indigo)")} onBlur={(e) => (e.target.style.borderColor = "var(--border)")}
+              />
+            </div>
+            <div>
+              <label style={{ fontSize: 12, fontWeight: 700, color: "var(--ink-2)", display: "block", marginBottom: 7, textTransform: "uppercase", letterSpacing: "0.06em" }}>
+                Cover Image <span style={{ color: "var(--ink-4)", fontWeight: 400, textTransform: "none" }}>(optional)</span>
+              </label>
+              {editPreview ? (
+                <div style={{ position: "relative", borderRadius: 10, overflow: "hidden", border: "1.5px solid var(--border)" }}>
+                  <img src={editPreview} alt="Preview" style={{ width: "100%", height: 160, objectFit: "cover", display: "block" }} />
+                  <button onClick={() => { setEditImage(null); setEditPreview(null); if (fileInputRef.current) fileInputRef.current.value = ""; }}
+                    style={{ position: "absolute", top: 10, right: 10, background: "rgba(0,0,0,0.65)", color: "#fff", border: "none", borderRadius: 6, padding: "5px 10px", fontSize: 12, cursor: "pointer" }}>Remove</button>
+                </div>
+              ) : (
+                <button type="button" onClick={() => fileInputRef.current?.click()}
+                  style={{ width: "100%", height: 90, border: "2px dashed var(--border-2)", borderRadius: 10, background: "var(--bg-2)", color: "var(--ink-3)", fontSize: 13, cursor: "pointer" }}
+                  onMouseEnter={(e) => { (e.currentTarget as HTMLButtonElement).style.borderColor = "var(--indigo)"; (e.currentTarget as HTMLButtonElement).style.color = "var(--indigo)"; }}
+                  onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.borderColor = "var(--border-2)"; (e.currentTarget as HTMLButtonElement).style.color = "var(--ink-3)"; }}
+                >+ Click to upload new cover image</button>
+              )}
+              <input ref={fileInputRef} type="file" accept="image/*" onChange={(e) => { const f = e.target.files?.[0] || null; setEditImage(f); setEditPreview(f ? URL.createObjectURL(f) : null); }} className="hidden" />
+            </div>
+            <div style={{ display: "flex", gap: 10, justifyContent: "flex-end" }}>
+              <button onClick={closeEdit} style={{ padding: "10px 20px", borderRadius: 9, fontSize: 13, fontWeight: 600, color: "var(--ink-3)", border: "1px solid var(--border)", background: "var(--bg-2)", cursor: "pointer" }}>Cancel</button>
+              <button onClick={submitEdit} disabled={editLoading}
+                style={{ padding: "10px 24px", borderRadius: 9, fontSize: 13, fontWeight: 700, background: editLoading ? "var(--indigo-3)" : "linear-gradient(135deg, var(--indigo), var(--indigo-2))", color: "#fff", cursor: editLoading ? "not-allowed" : "pointer", boxShadow: "0 4px 14px rgba(79,53,210,0.3)" }}
+                className="hover:opacity-90"
+              >
+                {editLoading ? "Saving…" : "Save Changes"}
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    )}
+    </>
   );
 }

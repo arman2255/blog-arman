@@ -55,16 +55,6 @@ export default function Navbar() {
         <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
           {loggedIn ? (
             <>
-              {username && (
-                <span style={{
-                  fontSize: 12, fontWeight: 600, color: "var(--indigo)",
-                  background: "var(--indigo-bg)", padding: "3px 10px",
-                  borderRadius: 20, border: "1px solid var(--indigo-border)",
-                  marginRight: 4,
-                }}>
-                  @{username}
-                </span>
-              )}
               <button
                 onClick={() => router.push("/create")}
                 style={{
@@ -91,6 +81,22 @@ export default function Navbar() {
                   ⚙ Admin
                 </button>
               )}
+              {/* Profile avatar button */}
+              <button
+                onClick={() => router.push("/profile")}
+                title={`@${username} — My Profile`}
+                style={{
+                  width: 34, height: 34, borderRadius: "50%",
+                  background: "linear-gradient(135deg, var(--indigo), var(--indigo-3))",
+                  color: "#fff", fontSize: 14, fontWeight: 800,
+                  display: "flex", alignItems: "center", justifyContent: "center",
+                  border: "2px solid var(--indigo-border)",
+                  cursor: "pointer", flexShrink: 0,
+                }}
+                className="hover:opacity-80 transition-opacity"
+              >
+                {username[0]?.toUpperCase() || "U"}
+              </button>
               <button
                 onClick={logout}
                 style={{ color: "var(--ink-3)", fontSize: 13, padding: "7px 12px", borderRadius: 8 }}

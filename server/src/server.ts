@@ -4,6 +4,7 @@ import cors from "cors";
 import connectDB from "./config/db";
 import authRoutes from "./routes/auth";
 import blogRoutes from "./routes/blog";
+import seedRoutes from "./routes/seed";
 import adminRoutes from "./routes/admin";
 
 const app = express();
@@ -20,6 +21,7 @@ app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
 app.use("/api/auth", authRoutes);
 app.use("/api/blogs", blogRoutes);
+app.use("/api/seed", seedRoutes);
 app.use("/api/admin", adminRoutes);
 
 app.listen(PORT, () => {

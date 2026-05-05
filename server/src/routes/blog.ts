@@ -1,13 +1,16 @@
 import { Router, Request, Response, NextFunction } from "express";
-import { getBlogs, getBlogById, createBlog, likeBlog } from "../controllers/blogController";
+import {
+  getBlogs, getBlogById, createBlog, likeBlog,
+  getMyBlogs, updateBlog, deleteBlog,
+} from "../controllers/blogController";
 import authMiddleware from "../middleware/auth";
 import upload from "../middleware/upload";
 import multer from "multer";
 
 const router = Router();
 
-// Wrap multer so upload errors (wrong file type, size limit) return a clean JSON response
-// instead of crashing the request. Image is always optional — no file is fine.
+// Wrap multer so upload errors return a clean JSON response.
+// Image is always optional — no file is fine.
 function handleUpload(req: Request, res: Response, next: NextFunction) {
   upload.single("image")(req, res, (err) => {
     if (err instanceof multer.MulterError) {
@@ -22,9 +25,12 @@ function handleUpload(req: Request, res: Response, next: NextFunction) {
   });
 }
 
-router.get("/", getBlogs);
-router.get("/:id", getBlogById);
-router.post("/", authMiddleware, handleUpload, createBlog);
-router.post("/:id/like", authMiddleware, likeBlog);
+router.get("/",           getBlogs);
+router.get("/mine",       authMiddleware, getMyBlogs);
+router.get("/:id",        getBlogById);
+router.post("/",          authMiddleware, handleUpload, createBlog);
+router.put("/:id",        authMiddleware, handleUpload, updateBlog);
+router.delete("/:id",     authMiddleware, deleteBlog);
+router.post("/:id/like",  authMiddleware, likeBlog);
 
 export default router;
