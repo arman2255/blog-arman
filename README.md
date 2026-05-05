@@ -67,8 +67,8 @@ blogify/
 ### 1. Clone the repository
 
 ```bash
-git clone https://github.com/yourusername/blogify.git
-cd blogify
+git clone https://github.com/arman2255/blog-arman.git
+cd blog-arman
 ```
 
 ---
