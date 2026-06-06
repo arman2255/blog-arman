@@ -41,6 +41,40 @@
   --red-bg:    rgba(220,38,38,0.06);
 }
 
+/* ── Dark mode ───────────────────────────────── */
+[data-theme="dark"] {
+  --bg:        #0f0e1a;
+  --bg-2:      #1a1830;
+  --bg-3:      #242240;
+  --surface:   #1a1830;
+
+  --ink:       #f0eeff;
+  --ink-2:     #c4bef0;
+  --ink-3:     #8b84c0;
+  --ink-4:     #5a5480;
+
+  --indigo:    #8b74f0;
+  --indigo-2:  #a08af5;
+  --indigo-3:  #6b52e8;
+  --indigo-bg: rgba(139,116,240,0.12);
+  --indigo-border: rgba(139,116,240,0.25);
+
+  --coral:     #f87171;
+  --coral-bg:  rgba(248,113,113,0.1);
+
+  --amber:     #fbbf24;
+  --amber-bg:  rgba(251,191,36,0.1);
+
+  --teal:      #2dd4bf;
+  --teal-bg:   rgba(45,212,191,0.1);
+
+  --border:    #2e2b4a;
+  --border-2:  #3d3960;
+
+  --red:       #f87171;
+  --red-bg:    rgba(248,113,113,0.1);
+}
+
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 html { scroll-behavior: smooth; }
 

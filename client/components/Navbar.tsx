@@ -4,17 +4,33 @@ import { useEffect, useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
 
 export default function Navbar() {
-  const router = useRouter();
+  const router   = useRouter();
   const pathname = usePathname();
   const [loggedIn, setLoggedIn] = useState(false);
   const [username, setUsername] = useState("");
-  const [isAdmin, setIsAdmin] = useState(false);
+  const [isAdmin, setIsAdmin]   = useState(false);
+  const [dark, setDark]         = useState(false);
+
+  // Load theme from localStorage on mount
+  useEffect(() => {
+    const saved = localStorage.getItem("theme");
+    const isDark = saved === "dark";
+    setDark(isDark);
+    document.documentElement.setAttribute("data-theme", isDark ? "dark" : "light");
+  }, []);
 
   useEffect(() => {
     setLoggedIn(!!localStorage.getItem("token"));
     setUsername(localStorage.getItem("username") || "");
     setIsAdmin(localStorage.getItem("isAdmin") === "true");
   }, [pathname]);
+
+  const toggleDark = () => {
+    const next = !dark;
+    setDark(next);
+    localStorage.setItem("theme", next ? "dark" : "light");
+    document.documentElement.setAttribute("data-theme", next ? "dark" : "light");
+  };
 
   const logout = () => {
     localStorage.removeItem("token");
@@ -53,6 +69,33 @@ export default function Navbar() {
 
         {/* Actions */}
         <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+
+          {/* ── Dark mode toggle ── */}
+          <button
+            onClick={toggleDark}
+            title={dark ? "Switch to light mode" : "Switch to dark mode"}
+            style={{
+              width: 44, height: 24, borderRadius: 12,
+              background: dark ? "var(--indigo)" : "var(--border-2)",
+              border: "none", cursor: "pointer",
+              position: "relative", transition: "background 0.25s",
+              flexShrink: 0,
+            }}
+          >
+            {/* Sliding circle */}
+            <span style={{
+              position: "absolute",
+              top: 3, left: dark ? 23 : 3,
+              width: 18, height: 18, borderRadius: "50%",
+              background: "#fff",
+              transition: "left 0.25s",
+              display: "flex", alignItems: "center", justifyContent: "center",
+              fontSize: 10,
+            }}>
+              {dark ? "🌙" : "☀️"}
+            </span>
+          </button>
+
           {loggedIn ? (
             <>
               <button
